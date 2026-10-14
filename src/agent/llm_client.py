@@ -577,5 +577,5 @@ def _llm_call(system: str, user: str, timeout: float = 20.0,
                                   max_tokens=max_tokens)
         except Exception:
             pass
-    return _llm_call(system, user, timeout=timeout,
+    return _gemini_call(system, user, timeout=timeout,
                          temperature=temperature, max_tokens=max_tokens)
