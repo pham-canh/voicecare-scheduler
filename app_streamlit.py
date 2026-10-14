@@ -476,6 +476,13 @@ def main():
         fresh_clicked = st.button("🧹 Fresh take (clear + run)", type="primary")
     with tc2:
         run_clicked = st.button("▶ RUN FULL DEMO")
+    # ?autorun=1 starts the take with no click — used to record the demo video
+    # and for judges who just want to watch the visit happen. Fires once per
+    # session so Streamlit reruns don't restart it mid-take.
+    if (st.query_params.get("autorun") == "1"
+            and not st.session_state.get("_autorun_done")):
+        st.session_state["_autorun_done"] = True
+        fresh_clicked = True
     if run_clicked or fresh_clicked:
         try:
             with st.spinner("🎬 Running full demo: specialty → time → YES (real LLM)..."):
