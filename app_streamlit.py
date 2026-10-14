@@ -468,6 +468,12 @@ def main():
     has_nem = bool(os.getenv("NEBIUS_API_KEY","").strip())
     render_status_bar(has_aai, has_llm, has_nem)
     render_state_stepper(current_state())
+    # Outcome of the previous take. It has to survive st.rerun(), otherwise the
+    # success/warning below is wiped before anyone can read it — which is why a
+    # failed take used to look like nothing had happened.
+    _notice = st.session_state.pop("_demo_notice", None)
+    if _notice:
+        st.success(_notice) if _notice[0] == "success" else st.warning(_notice[1])
 
     st.markdown("### 🎬 One-click take")
     st.caption("Recording? Fresh take, then play the replay — the AI voices the whole visit. Judge self-driving? RUN FULL DEMO or Manual input.")
@@ -490,10 +496,14 @@ def main():
                 with st.spinner("🔊 Voicing the take (up to ~25s)..."):
                     st.session_state.take_audio = build_take_audio()
             if ok:
-                st.success("Full demo booked — press play on the replay, then stop recording.")
+                st.session_state["_demo_notice"] = (
+                    "success",
+                    "Full demo booked — press play on the replay, then stop recording.")
             else:
-                st.warning("Demo did not book (slot may be full on shared server). "
-                           "Try Fresh take, or Sidebar → Reset demo slots.")
+                st.session_state["_demo_notice"] = (
+                    "warning",
+                    "Demo did not book (slot may be full on shared server). "
+                    "Try Fresh take, or Sidebar → Reset demo slots.")
             st.rerun()
         except Exception as e:
             # Never fail silent: show the real error so judges/users see it.
