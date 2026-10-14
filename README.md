@@ -2,13 +2,30 @@
 
 ![demo](https://img.shields.io/badge/demo-live-brightgreen) ![ci](https://img.shields.io/badge/ci-pytest-blue) ![license](https://img.shields.io/badge/license-MIT-green)
 
-Event: https://lablab.ai/ai-hackathons/assemblyai-voice-agent-hackathon | Stack: voice | Demo: https://voicecare-scheduler-lmzkozkdf4rssh4w6vz8p6.streamlit.app/ | Video: (filming 4:05 — YouTube unlisted Not-for-Kids, title `VoiceCare Scheduler — voice clinic booking (AssemblyAI track)`)
+Event: https://lablab.ai/ai-hackathons/assemblyai-voice-agent-hackathon | Stack: voice | Demo: https://voicecare-scheduler-ajthuna54dqqhpqtt52n2b.streamlit.app/ | Video: (filming 4:05 — YouTube unlisted Not-for-Kids, title `VoiceCare Scheduler — voice clinic booking (AssemblyAI track)`)
 
 > Speak to book your clinic visit — a voice agent that books appointments for elderly patients: listen → confirm aloud → book, with per-stage latency in ms. English-only.
 
+## Nebius x NVIDIA Global AI Hackathon (Devpost entry)
+
+NLU runs on **NVIDIA Nemotron (`nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B`) via
+Nebius Token Factory** on Nebius AI Cloud. Gemini stays as automatic fallback,
+regex as last resort. Speech-to-text stays AssemblyAI.
+
+```bash
+export NEBIUS_API_KEY='...'   # Token Factory key (free $25 with code NEBIUS-DEVPOST-GLOBAL26)
+export NEMOTRON_MODEL='nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B'  # optional override
+export NEBIUS_BASE_URL='https://api.tokenfactory.nebius.com/v1'  # optional override
+```
+
+Smoke test (needs key in env):
+```bash
+python3 -c "import sys; sys.path.insert(0, 'src'); from agent.nemotron_client import nemotron_call; print(nemotron_call('Output JSON only: {"verdict": "yes|no|unclear"}.', 'Classify: yes please book it'))"
+```
+
 ## Demo
 
-- Live: https://voicecare-scheduler-lmzkozkdf4rssh4w6vz8p6.streamlit.app/ (Streamlit Cloud, judges open and use it, no setup — if asleep, press Wake)
+- Live: https://voicecare-scheduler-ajthuna54dqqhpqtt52n2b.streamlit.app/ (Streamlit Cloud, judges open and use it, no setup — if asleep, press Wake)
 - Video 4:05 silent shoot per `PITCH_SCRIPT.md` + `video/QUAY_CAM.md` + `video/OVERLAYS_EN.srt` (8 cues, YouTube unlisted, Not-for-Kids)
 
 ## Run (5 minutes, no questions asked)
