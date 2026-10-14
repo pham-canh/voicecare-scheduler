@@ -121,7 +121,7 @@ def _correction_prefix(history=None) -> str:
     return ""
 
 
-def _llm_call(system: str, user: str, timeout: float = 20.0, temperature: float = 0.0,
+def _gemini_call(system: str, user: str, timeout: float = 20.0, temperature: float = 0.0,
                  max_tokens: int = 512) -> str:
     global _GEMINI_DEAD, _GEMINI_COOLDOWN_UNTIL
     if _GEMINI_DEAD:
