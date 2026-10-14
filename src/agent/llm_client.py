@@ -87,7 +87,7 @@ def _dialogue_call(prompt: str, timeout: float = 20.0) -> str:
     try:
         if not load_gemini_key():
             return ""
-        raw = _gemini_call(DIALOGUE_SYSTEM, prompt, timeout=timeout,
+        raw = _llm_call(DIALOGUE_SYSTEM, prompt, timeout=timeout,
                            temperature=0.7, max_tokens=120)
         raw = (raw or "").strip().strip('"')
         if raw and len(raw) < 300:
@@ -121,7 +121,7 @@ def _correction_prefix(history=None) -> str:
     return ""
 
 
-def _gemini_call(system: str, user: str, timeout: float = 20.0, temperature: float = 0.0,
+def _llm_call(system: str, user: str, timeout: float = 20.0, temperature: float = 0.0,
                  max_tokens: int = 512) -> str:
     global _GEMINI_DEAD, _GEMINI_COOLDOWN_UNTIL
     if _GEMINI_DEAD:
@@ -304,7 +304,7 @@ def extract_appointment(transcript: str) -> dict:
     t0 = time.perf_counter()
     try:
         if load_gemini_key():
-            raw = _gemini_call(EXTRACT_SYSTEM, f"Extract: {transcript}")
+            raw = _llm_call(EXTRACT_SYSTEM, f"Extract: {transcript}")
             d = _parse_json(raw)
             if d:
                 ms = round((time.perf_counter() - t0) * 1000, 1)
@@ -348,7 +348,7 @@ def extract_appointment(transcript: str) -> dict:
 def confirm_verdict(text: str) -> str:
     try:
         if load_gemini_key() and (text or "").strip():
-            raw = _gemini_call(CONFIRM_SYSTEM, f"Classify: {text}")
+            raw = _llm_call(CONFIRM_SYSTEM, f"Classify: {text}")
             d = _parse_json(raw)
             v = str(d.get("verdict", "") or "").lower().strip()
             if v in ("yes", "no", "unclear"):
@@ -409,7 +409,7 @@ def generate_readback(ent: dict, history=None) -> str:
             )
             if raw and "YES" in raw:
                 return raw.strip()
-            raw2 = _gemini_call(
+            raw2 = _llm_call(
                 "You write one short clinic confirmation sentence. No JSON, one sentence, English.",
                 f"Confirm {spec_t}{doc_t} at {time_t} {day}. Ask: Should I book this? Say YES to confirm.",
             )
@@ -560,3 +560,22 @@ def missing_question(missing: list, ent: dict | None = None, history=None) -> st
             (f"Perfect{ctx}. Which time should I check — e.g. 9 o'clock?"),
         ], key=str(ent.get("specialty", "")) + str(ent.get("date_label", "")))
     return "Could you say that again?"
+
+try:
+    from .nemotron_client import nemotron_call as _nemotron_call
+except Exception:
+    _nemotron_call = None
+
+
+def _llm_call(system: str, user: str, timeout: float = 20.0,
+              temperature: float = 0.0, max_tokens: int = 512) -> str:
+    """Nemotron first (hackathon requirement), Gemini fallback."""
+    if _nemotron_call is not None:
+        try:
+            return _nemotron_call(system, user, timeout=timeout,
+                                  temperature=temperature,
+                                  max_tokens=max_tokens)
+        except Exception:
+            pass
+    return _llm_call(system, user, timeout=timeout,
+                         temperature=temperature, max_tokens=max_tokens)
