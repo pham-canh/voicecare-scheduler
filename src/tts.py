@@ -17,6 +17,11 @@ import tempfile
 VOICE_EN = "en-US-AriaNeural"
 SAY_VOICE = "Samantha"  # macOS en-US female, present on stock macOS
 
+# Per-utterance ceiling for edge-tts. The one-click demo speaks 3-4 utterances
+# per take, so a slow or blackholed network multiplies this into a multi-minute
+# spinner. 6s is ample for a short line and keeps the failover chain snappy.
+EDGE_TTS_TIMEOUT_S = 6
+
 last_error = ""
 
 
@@ -38,7 +43,7 @@ def _speak_edge(text: str, dst: str) -> bool:
         async def _run():
             tts = edge_tts.Communicate(text[:500], VOICE_EN)
             # Fail fast: a blackholed network must not hang the take forever.
-            await asyncio.wait_for(tts.save(dst), timeout=25)
+            await asyncio.wait_for(tts.save(dst), timeout=EDGE_TTS_TIMEOUT_S)
 
         asyncio.run(_run())
         p = Path(dst)

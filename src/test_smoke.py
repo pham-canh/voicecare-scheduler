@@ -353,3 +353,47 @@ def test_llm_harness_present():
     assert e["specialty"] == "cardiology" and e["hour"] == 9
     assert llm_client.confirm_verdict("yes, book it") == "yes"
     assert "u3-rt-pro" in stt_client.build_ws_url()
+
+
+def test_nemotron_gate_does_not_require_gemini(monkeypatch):
+    """Nebius alone must be enough to reach the LLM path.
+
+    Regression: the gate used to be load_gemini_key() only, so adding
+    NEBIUS_API_KEY alone left the app on regex fallback and failed the
+    hackathon's "must run on Nebius" requirement.
+    """
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.setenv("NEBIUS_API_KEY", "n" * 30)
+    import agent.config as cfg
+    import agent.llm_client as llm_client
+    assert cfg.has_nebius() is True
+    assert cfg.key_status()["nebius_set"] is True
+    assert llm_client._has_any_llm_key() is True
+
+
+def test_nlu_source_reports_real_provider(monkeypatch):
+    """The returned source must name the provider that actually answered."""
+    import agent.llm_client as llm_client
+    payload = '{"specialty":"cardiology","day":"tomorrow","hour":9}'
+    monkeypatch.setattr(llm_client, "_has_any_llm_key", lambda: True)
+    monkeypatch.setattr(llm_client, "_nemotron_call", lambda *a, **k: payload)
+    llm_client._LAST_LLM_BACKEND = ""
+    ent = llm_client.extract_appointment("Book cardiology tomorrow at 9")
+    assert llm_client._LAST_LLM_BACKEND == "nemotron"
+    assert ent["source"] == "nemotron"
+
+
+def test_nlu_source_reports_gemini_on_fallback(monkeypatch):
+    """If Nemotron errors, the source must honestly say Gemini."""
+    import agent.llm_client as llm_client
+    payload = '{"specialty":"cardiology","day":"tomorrow","hour":9}'
+
+    def _boom(*a, **k):
+        raise RuntimeError("nemotron unavailable")
+
+    monkeypatch.setattr(llm_client, "_has_any_llm_key", lambda: True)
+    monkeypatch.setattr(llm_client, "_nemotron_call", _boom)
+    monkeypatch.setattr(llm_client, "_gemini_call", lambda *a, **k: payload)
+    llm_client._LAST_LLM_BACKEND = ""
+    ent = llm_client.extract_appointment("Book cardiology tomorrow at 9")
+    assert ent["source"] == "gemini"
