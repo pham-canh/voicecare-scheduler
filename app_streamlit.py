@@ -424,12 +424,15 @@ def main():
         gsec = st.secrets.get("GEMINI_API_KEY", "") if hasattr(st, "secrets") else ""
         if gsec and not os.getenv("GEMINI_API_KEY"):
             os.environ["GEMINI_API_KEY"] = str(gsec)
+        nsec = st.secrets.get("NEBIUS_API_KEY", "") if hasattr(st, "secrets") else ""
+        if nsec and not os.getenv("NEBIUS_API_KEY"):
+            os.environ["NEBIUS_API_KEY"] = str(nsec)
     except Exception:
         pass
     init_state()
     st.title("VoiceCare")
     st.subheader("Voice-first Clinic Scheduling")
-    st.caption("Speak. I listen. I check. You confirm. · English-only · AssemblyAI + Gemini")
+    st.caption("Speak. I listen. I check. You confirm. · English-only · AssemblyAI + Nemotron")
 
     with st.sidebar:
         st.subheader("Settings")
@@ -440,9 +443,12 @@ def main():
             gkey = st.text_input("GEMINI_API_KEY (LLM understanding)", value="", type="password")
             if gkey:
                 os.environ["GEMINI_API_KEY"] = gkey
+            nkey = st.text_input("NEBIUS_API_KEY (Nemotron NLU)", value="", type="password")
+            if nkey:
+                os.environ["NEBIUS_API_KEY"] = nkey
         except Exception:
             pass
-        st.caption("Without keys: typed try-out + fallback NLU (labeled). Add both keys for full voice agent.")
+        st.caption("Without keys: typed try-out + fallback NLU (labeled). Add keys for full voice agent.")
         if st.button("Restart call"):
             for k in ("history","pending_text","pending_result","last_result","booking","booking_ics","played_for"):
                 st.session_state[k] = [] if k == "history" else ("" if isinstance(st.session_state.get(k,""),str) else None)
