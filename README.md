@@ -83,7 +83,7 @@ mic/file --token+WS--> AssemblyAI Voice Agent API (inline en session)
 - `ASSEMBLYAI_API_KEY` (optional, real STT for .wav/.mp3/.m4a) — free at https://www.assemblyai.com/ → API keys. Without a key it still runs labeled local-sim (backend labeled).
 - Never commit real keys. Use environment variables (see `.gitignore`).
 
-## Structure (root pushed to GitHub, Devpost paste-kit in devpost/DEVKIT.md)
+## Structure (root pushed to GitHub, Devpost paste-kit in ../devpost/voicecare-scheduler/DEVKIT.md)
 
 - `src/main.py` — STT/batch fallback pipeline + tools (check/book, YES-gated strict)
 - `src/agent_api.py` — managed Voice Agent API (one-time token + direct voice WS + TTS)
@@ -91,7 +91,7 @@ mic/file --token+WS--> AssemblyAI Voice Agent API (inline en session)
 - `src/test_smoke.py` — smoke tests (CI runs)
 - `app_streamlit.py` — main demo (single Streamlit URL for judges, 🎙 Voice Agent API demo button + labeled-backend fallback)
 - `app.py` — secondary HF Spaces demo (Gradio), same `run_pipeline` wrapper (see file docstring)
-- `devpost/DEVKIT.md` — Devpost paste-kit (demo URL, video URL, gallery captions, Nebius/NVIDIA feedback)
+- `../devpost/voicecare-scheduler/DEVKIT.md` — Devpost paste-kit (demo URL, video URL, gallery captions, Nebius/NVIDIA feedback)
 
 ## Credits & prior art (what we used vs what we built)
 
