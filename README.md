@@ -2,7 +2,7 @@
 
 ![demo](https://img.shields.io/badge/demo-live-brightgreen) ![ci](https://img.shields.io/badge/ci-pytest-blue) ![license](https://img.shields.io/badge/license-MIT-green)
 
-Event: Devpost — Nebius x NVIDIA Global AI Hackathon | Stack: voice + NVIDIA Nemotron NLU | Demo: https://voicecare-scheduler-ajthuna54dqqhpqtt52n2b.streamlit.app/ | Video: YOUTUBE_URL_CHUA_UP (1:51, Nemotron + AssemblyAI, YouTube unlisted Not-for-Kids)
+Event: Devpost — Nebius x NVIDIA Global AI Hackathon | Stack: voice + NVIDIA Nemotron NLU | Demo: https://voicecare-scheduler-ajthuna54dqqhpqtt52n2b.streamlit.app/ | Video: https://youtu.be/Eb-U11iCY58 (1:24, dubbed EN narration, YouTube unlisted Not-for-Kids)
 
 > Speak to book your clinic visit — a voice agent that books appointments for elderly patients: listen → confirm aloud → book, with per-stage latency in ms. English-only.
 
@@ -26,7 +26,7 @@ python3 -c "import sys; sys.path.insert(0, 'src'); from agent.nemotron_client im
 ## Demo
 
 - Live: https://voicecare-scheduler-ajthuna54dqqhpqtt52n2b.streamlit.app/ (Streamlit Cloud, judges open and use it, no setup — if asleep, press Wake)
-- Video 1:51 (4 scenes: Nemotron cover → verdict YES → listening → booked; TTS narration; YouTube unlisted, Not-for-Kids)
+- Video 1:24 https://youtu.be/Eb-U11iCY58 (terminal take: 2 bookings VC-40020/VC-66418 + barge-in + nurse handoff → pitch card → one-click browser take ends Booked; dubbed EN narration; YouTube unlisted, Not-for-Kids)
 
 ## Run (5 minutes, no questions asked)
 
