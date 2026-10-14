@@ -16,7 +16,13 @@ import re
 import time
 import urllib.request
 
-from .config import load_gemini_key, GEMINI_MODEL, GEMINI_ENDPOINT_TMPL
+from .config import load_gemini_key, load_nebius_key, GEMINI_MODEL, GEMINI_ENDPOINT_TMPL
+
+_LAST_LLM_BACKEND = ""
+
+
+def _has_any_llm_key() -> bool:
+    return bool(load_gemini_key() or load_nebius_key())
 
 _GEMINI_DEAD = False
 _GEMINI_COOLDOWN_UNTIL = 0.0  # epoch s; set on 429 so bursts fall back fast
@@ -85,7 +91,7 @@ DIALOGUE_SYSTEM = (
 def _dialogue_call(prompt: str, timeout: float = 20.0) -> str:
     """Human phrasing via Gemini (temp 0.7). Returns '' on any failure."""
     try:
-        if not load_gemini_key():
+        if not _has_any_llm_key():
             return ""
         raw = _llm_call(DIALOGUE_SYSTEM, prompt, timeout=timeout,
                            temperature=0.7, max_tokens=120)
@@ -303,7 +309,7 @@ def fallback_confirm(text: str) -> str:
 def extract_appointment(transcript: str) -> dict:
     t0 = time.perf_counter()
     try:
-        if load_gemini_key():
+        if _has_any_llm_key():
             raw = _llm_call(EXTRACT_SYSTEM, f"Extract: {transcript}")
             d = _parse_json(raw)
             if d:
@@ -319,7 +325,7 @@ def extract_appointment(transcript: str) -> dict:
                     "minute": int(d.get("minute", 0) or 0),
                     "phone": str(d.get("phone", "") or ""),
                     "confidence": float(d.get("confidence", 0.5) or 0.5),
-                    "source": "gemini",
+                    "source": _LAST_LLM_BACKEND or "gemini",
                     "nlu_ms": ms,
                 }
                 # normalize hour
@@ -347,7 +353,7 @@ def extract_appointment(transcript: str) -> dict:
 
 def confirm_verdict(text: str) -> str:
     try:
-        if load_gemini_key() and (text or "").strip():
+        if _has_any_llm_key() and (text or "").strip():
             raw = _llm_call(CONFIRM_SYSTEM, f"Classify: {text}")
             d = _parse_json(raw)
             v = str(d.get("verdict", "") or "").lower().strip()
@@ -393,7 +399,7 @@ def generate_readback(ent: dict, history=None) -> str:
     # Prefer LLM phrasing when a key exists, else warm deterministic variants.
     # NOTE: every variant keeps uppercase YES so the consent gate + tests stay green.
     try:
-        if load_gemini_key():
+        if _has_any_llm_key():
             hist_txt = ""
             try:
                 hist = history or []
@@ -439,7 +445,7 @@ def full_slot_message(ent: dict, suggest_hour=None) -> str:
     hour = (ent or {}).get("hour", "")
     hour_s = f"{hour}:00" if isinstance(hour, int) else str(hour or "that time")
     try:
-        if load_gemini_key():
+        if _has_any_llm_key():
             raw = _dialogue_call(
                 f"Tell the patient {hour_s} {day} {spec} is fully booked, apologize briefly, "
                 f"offer {suggest_hour}:00 instead or ask for another time. "
@@ -470,7 +476,7 @@ def booked_message(rec: dict) -> str:
         hh = str(hour)
     bid = rec.get("id", "")
     try:
-        if load_gemini_key():
+        if _has_any_llm_key():
             raw = _dialogue_call(
                 f"Confirm booking: {spec}{doc_t}, {day} at {hh}, ID {bid}. "
                 "Warm, brief, remind to arrive 15 min early with insurance card.",
@@ -490,7 +496,7 @@ def booked_message(rec: dict) -> str:
 
 def escalation_message() -> str:
     try:
-        if load_gemini_key():
+        if _has_any_llm_key():
             raw = _dialogue_call(
                 "The line is unclear. Apologize warmly and say you're transferring "
                 "to the nurse hotline. One short sentence.",
@@ -515,7 +521,7 @@ def missing_question(missing: list, ent: dict | None = None, history=None) -> st
     ent = ent or {}
     # Try one warm LLM line first so phrasing varies visit to visit.
     try:
-        if load_gemini_key():
+        if _has_any_llm_key():
             need = ",".join(missing or [])
             have = f"{ent.get('specialty','')}|{ent.get('date_label','')}|{ent.get('hour','')}"
             raw = _dialogue_call(
@@ -570,12 +576,17 @@ except Exception:
 def _llm_call(system: str, user: str, timeout: float = 20.0,
               temperature: float = 0.0, max_tokens: int = 512) -> str:
     """Nemotron first (hackathon requirement), Gemini fallback."""
+    global _LAST_LLM_BACKEND
     if _nemotron_call is not None:
         try:
-            return _nemotron_call(system, user, timeout=timeout,
-                                  temperature=temperature,
-                                  max_tokens=max_tokens)
+            out = _nemotron_call(system, user, timeout=timeout,
+                                 temperature=temperature,
+                                 max_tokens=max_tokens)
+            _LAST_LLM_BACKEND = "nemotron"
+            return out
         except Exception:
             pass
-    return _gemini_call(system, user, timeout=timeout,
-                         temperature=temperature, max_tokens=max_tokens)
+    out = _gemini_call(system, user, timeout=timeout,
+                       temperature=temperature, max_tokens=max_tokens)
+    _LAST_LLM_BACKEND = "gemini"
+    return out

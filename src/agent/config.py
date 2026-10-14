@@ -37,6 +37,15 @@ SAMPLE_RATE = 16000
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.8-flash").strip() or "gemini-3.8-flash"
 GEMINI_ENDPOINT_TMPL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 
+NEMOTRON_MODEL = (
+    os.getenv("NEMOTRON_MODEL", "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B").strip()
+    or "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B"
+)
+NEBIUS_BASE_URL = (
+    os.getenv("NEBIUS_BASE_URL", "https://api.tokenfactory.nebius.com/v1").strip()
+    or "https://api.tokenfactory.nebius.com/v1"
+)
+
 # English boost phrases for AssemblyAI streaming (free, max 100).
 EN_KEYTERMS = [
     "cardiology", "general internal medicine", "ent", "ear nose throat",
@@ -72,6 +81,10 @@ def load_gemini_key() -> str:
     return os.getenv("GEMINI_API_KEY", "").strip()
 
 
+def load_nebius_key() -> str:
+    return os.getenv("NEBIUS_API_KEY", "").strip()
+
+
 def has_assemblyai() -> bool:
     return len(load_assemblyai_key()) >= 20
 
@@ -80,14 +93,22 @@ def has_gemini() -> bool:
     return len(load_gemini_key()) >= 10
 
 
+def has_nebius() -> bool:
+    return len(load_nebius_key()) >= 10
+
+
 def key_status() -> dict:
     a = load_assemblyai_key()
     g = load_gemini_key()
+    n = load_nebius_key()
     return {
         "assemblyai_set": len(a) >= 20,
         "assemblyai_len": len(a),
         "gemini_set": len(g) >= 10,
         "gemini_len": len(g),
         "gemini_model": GEMINI_MODEL,
+        "nebius_set": len(n) >= 10,
+        "nebius_len": len(n),
+        "nebius_model": NEMOTRON_MODEL,
         "streaming_model": AAI_STREAMING_MODEL,
     }
