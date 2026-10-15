@@ -419,7 +419,7 @@ def main():
         r = ask_once(text="I'd like to book a cardiology appointment tomorrow morning")
         print(r.get("reply",""), "|", r.get("total_ms"), "ms")
         return
-    st.set_page_config(page_title="VoiceCare — voice clinic booking")
+    st.set_page_config(page_title="VoiceCare Scheduler — Nebius x NVIDIA")
     # Cinematic dark theme: readable on camera, cards pop on dark.
     st.markdown(
         "<style>"
@@ -450,7 +450,7 @@ def main():
     except Exception:
         pass
     init_state()
-    st.title("VoiceCare")
+    st.title("VoiceCare Scheduler")
     st.subheader("Voice-first Clinic Scheduling")
     st.caption("Speak. I listen. I check. You confirm. · English-only · AssemblyAI + Nemotron")
 
