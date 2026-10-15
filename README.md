@@ -1,8 +1,8 @@
 # VoiceCare Scheduler — Nebius x NVIDIA Global AI Hackathon (Devpost entry)
 
-![demo](https://img.shields.io/badge/demo-live-brightgreen) ![ci](https://img.shields.io/badge/ci-pytest-blue) ![license](https://img.shields.io/badge/license-MIT-green)
+![demo](https://img.shields.io/badge/demo-live-brightgreen) ![license](https://img.shields.io/badge/license-MIT-green)
 
-Event: Devpost — Nebius x NVIDIA Global AI Hackathon | Stack: voice + NVIDIA Nemotron NLU | Demo: https://voicecare-scheduler-ajthuna54dqqhpqtt52n2b.streamlit.app/ | Video: ⚠️ `REPLACE_AFTER_UPLOAD` (1:24 dubbed EN take, **must be Public**, Not-for-Kids)
+Event: Devpost — Nebius x NVIDIA Global AI Hackathon | Stack: voice + NVIDIA Nemotron NLU | Demo: https://voicecare-scheduler-ajthuna54dqqhpqtt52n2b.streamlit.app/
 
 > Speak to book your clinic visit — a voice agent that books appointments for elderly patients: listen → confirm aloud → book, with per-stage latency in ms. English-only.
 
@@ -26,7 +26,6 @@ python3 -c "import sys; sys.path.insert(0, 'src'); from agent.nemotron_client im
 ## Demo
 
 - Live: https://voicecare-scheduler-ajthuna54dqqhpqtt52n2b.streamlit.app/ (Streamlit Cloud, judges open and use it, no setup — if asleep, press Wake)
-- Video 1:24 dubbed EN take (terminal take: 2 bookings VC-40020/VC-66418 + barge-in + nurse handoff → pitch card → one-click browser take ends Booked). ⚠️ **CHƯA UPLOAD.** Link `https://youtu.be/Eb-U11iCY58` **không tồn tại** — `oembed` trả `{"error":"Not Found"}`. Khi upload: chế độ **Public** (điều khoản hackathon đòi *"publicly visible"*, không phải unlisted), rồi thay `REPLACE_AFTER_UPLOAD` ở dòng trên. Kiểm lại bằng `curl "https://www.youtube.com/oembed?url=<LINK>&format=json"` — phải trả JSON có `title`.
 
 ## Run (5 minutes, no questions asked)
 
@@ -57,12 +56,11 @@ mic/file --token+WS--> AssemblyAI Voice Agent API (inline en session)
                                            |-> app_streamlit.py (Patient/Assistant dialogue, EN UI)
                                            |-> app.py (Gradio HF Spaces)
                                            |-> src/agent_api.py (Voice Agent API)
-                                           |-> src/test_smoke.py (pytest 24)
+                                           |-> src/test_smoke.py (pytest 28)
 ```
 
 - `src/main.py` — reusable core (portable to jobs/freelance, no contest-only code)
 - `app.py` — demo entry (Gradio), wraps `build()`
-- `SPEC.md` (if present) — versioned interfaces for other agents to build on
 
 ## Results (replay with `python3 src/main.py "..."`)
 
@@ -74,7 +72,7 @@ mic/file --token+WS--> AssemblyAI Voice Agent API (inline en session)
   - Realtime WS STT fallback (`src/realtime.py`, `u3-rt-pro + min_latency + language_codes=[en]` + English keyterms, auto-close 60s): handshake ~0.7-1.0s + PARTIAL ~1.1-1.3s + FINAL ~2.8-4.1s + Speaker A. Barge-in: interrupting FINAL → agent stops, uses newer utterance.
   - understand/act/speak <5ms (local regex+tools, measured per stage).
   - Hybrid: `structured_to_fields()` merges local + AssemblyAI into a live entity table, light TTS `src/tts.py` (edge-tts en fallback, missing lib → skip, never crash).
-- pytest 25 passed (`PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest src/ -q`)
+- pytest 28 passed (`PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest src/ -q`)
 
 ## API keys needed (if any)
 
@@ -83,22 +81,21 @@ mic/file --token+WS--> AssemblyAI Voice Agent API (inline en session)
 - `ASSEMBLYAI_API_KEY` (optional, real STT for .wav/.mp3/.m4a) — free at https://www.assemblyai.com/ → API keys. Without a key it still runs labeled local-sim (backend labeled).
 - Never commit real keys. Use environment variables (see `.gitignore`).
 
-## Structure (root pushed to GitHub, Devpost paste-kit in ../devpost/voicecare-scheduler/DEVKIT.md)
+## Structure
 
 - `src/main.py` — STT/batch fallback pipeline + tools (check/book, YES-gated strict)
 - `src/agent_api.py` — managed Voice Agent API (one-time token + direct voice WS + TTS)
 - `src/realtime.py` — streaming WS STT fallback (Universal-3-5-pro vi + diarization)
-- `src/test_smoke.py` — smoke tests (CI runs)
+- `src/test_smoke.py` — smoke tests
 - `app_streamlit.py` — main demo (single Streamlit URL for judges, 🎙 Voice Agent API demo button + labeled-backend fallback)
 - `app.py` — secondary HF Spaces demo (Gradio), same `run_pipeline` wrapper (see file docstring)
-- `../devpost/voicecare-scheduler/DEVKIT.md` — Devpost paste-kit (demo URL, video URL, gallery captions, Nebius/NVIDIA feedback)
 
 ## Credits & prior art (what we used vs what we built)
 
 Workflow patterns studied on GitHub informed the design; all dialogue logic, English entity parsing, and the consent gate are original work:
 
 - [ishanavasthi/clinicflow](https://github.com/ishanavasthi/clinicflow) — pattern: ask one thing at a time, never offer times before intake is complete, never claim a booking a tool didn't confirm.
-- [tusharjain1003/VoiceIntake-AI](https://github.com/tusharjain1003/VoiceIntake-AI) — pattern: FSM voice loop + healthcare guardrails + eval harness; ours: 5-state FSM + 24 pytest scenarios.
+- [tusharjain1003/VoiceIntake-AI](https://github.com/tusharjain1003/VoiceIntake-AI) — pattern: FSM voice loop + healthcare guardrails + eval harness; ours: 5-state FSM + 28 pytest scenarios.
 - [abhishekpabbathi/clinic-voice-agent](https://github.com/abhishekpabbathi/clinic-voice-agent) — pattern: `CONFIRMED` booking records + per-stage latency logging.
 - [JamesOkunlade/docbook-api](https://github.com/JamesOkunlade/docbook-api) / [KalebAsratemedhin/Efoy](https://github.com/KalebAsratemedhin/Efoy) — pattern: `specialty → doctor → schedule → appointment` with conflict rejection.
 
