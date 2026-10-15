@@ -87,17 +87,37 @@ def bubble(who, text):
             f"🤖 <b>Assistant:</b><br>{text}</div>", unsafe_allow_html=True)
 
 
+def _backend_label(has_nem, has_llm):
+    """Name the provider that actually answered, not the one we hoped would.
+
+    Before any call has run we only know which keys exist -- say so plainly
+    ("Nemotron on" is a claim, not a result). After the first NLU call we know
+    _LAST_LLM_BACKEND for certain, so we report that instead, including when it
+    is a fallback.
+    """
+    actual = getattr(llm_client, "_LAST_LLM_BACKEND", "") or ""
+    if actual == "nemotron":
+        return "Nemotron"
+    if actual == "gemini":
+        return "Gemini fallback"
+    if has_nem:
+        return "Nemotron on"
+    if has_llm:
+        return "Gemini fallback"
+    return "regex fallback"
+
+
 def render_status_bar(has_aai, has_llm, has_nem=False):
     if st.session_state.status in ("listening", "speaking"):
         st.markdown("🔵 **Listening...**" if st.session_state.status == "listening"
                     else "🔊 **Assistant is speaking...**")
     elif st.session_state.get("booking"):
         tag = "🟢 **AssemblyAI Connected**" if has_aai else "🟡 **Typed try-out (no key)**"
-        llm = " + Nemotron" if has_nem else (" + Gemini" if has_llm else " (regex fallback)")
+        llm = f" · {_backend_label(has_nem, has_llm)}"
         st.markdown(f"{tag}{llm} · ✓ Booked")
     else:
         tag = "🟢 **AssemblyAI Connected**" if has_aai else "🟡 **Typed try-out (no key)**"
-        llm = "Nemotron on" if has_nem else ("Gemini fallback" if has_llm else "regex fallback")
+        llm = _backend_label(has_nem, has_llm)
         st.markdown(f"{tag} · {llm} · Listening...")
 
 
