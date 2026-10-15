@@ -4,6 +4,10 @@
 
 Event: Devpost — Nebius x NVIDIA Global AI Hackathon | Stack: voice + NVIDIA Nemotron NLU | Demo: https://voicecare-scheduler-ajthuna54dqqhpqtt52n2b.streamlit.app/
 
+**Status:** in progress. This is a separate competition from
+[`assemblyai-voice-agent`](https://github.com/pham-canh/assemblyai-voice-agent),
+which is the completed AssemblyAI Voice Agent Hackathon (lablab.ai) entry.
+
 > Speak to book your clinic visit — a voice agent that books appointments for elderly patients: listen → confirm aloud → book, with per-stage latency in ms. English-only.
 
 ## Nebius x NVIDIA Global AI Hackathon (Devpost entry)
