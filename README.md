@@ -70,7 +70,7 @@ mic/file --token+WS--> AssemblyAI Voice Agent API (inline en session)
   - Live realtime (`python3 src/realtime.py --src sample_en.wav`): handshake **~1.0s** + first PARTIAL **~1.2s** + FINAL **~3.9s** + Speaker A → `book a cardiology checkup tomorrow morning at nine`. Batch (`python3 src/main.py sample_en.wav`): backend `assemblyai-structured`, diarization Speaker A, listen_ms **~8.5s** (upload+poll, 8–25s queue-dependent).
   - Voice Agent API (`src/agent_api.py`, inline en session + English keyterms + barge-in + 2 tools): `python3 src/agent_api.py --print-session` (offline) + live `python3 src/agent_api.py --src sample_en.wav` (needs key, one-time token, direct voice WS, TTS, tool.call->tool.result local, session.end against billing hang). Remove AssemblyAI: no real hearing/TTS, only labeled local-sim typing — voice booking dies (load-bearing).
   - Realtime WS STT fallback (`src/realtime.py`, `u3-rt-pro + min_latency + language_codes=[en]` + English keyterms, auto-close 60s): handshake ~0.7-1.0s + PARTIAL ~1.1-1.3s + FINAL ~2.8-4.1s + Speaker A. Barge-in: interrupting FINAL → agent stops, uses newer utterance.
-  - understand/act/speak <5ms (local regex+tools, measured per stage).
+  - Local regex fallback (used when no LLM key is set): understand/act/speak `<5ms` per stage. **With Nemotron active, `understand` is network-bound** — measured ~7.5s per call, reported live as `nlu_ms` in the `🔧 Technical` expander. `act`/`speak` stay instant either way.
   - Hybrid: `structured_to_fields()` merges local + AssemblyAI into a live entity table, light TTS `src/tts.py` (edge-tts en fallback, missing lib → skip, never crash).
 - pytest 28 passed (`PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest src/ -q`)
 
