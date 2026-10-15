@@ -88,7 +88,24 @@ DIALOGUE_SYSTEM = (
 )
 
 
-def _dialogue_call(prompt: str, timeout: float = 20.0) -> str:
+def _llm_timeout() -> float:
+    """Seconds any single LLM call may take.
+
+    Nebius Token Factory's Startup tier evaluates usage in rolling 15-minute
+    windows, so latency climbs from ~3s to 20s+ once a window is near its
+    limit. The old 20s default then turned that back-pressure into a silent
+    fallback to the regex path. Default 45s; override with
+    VOICECARE_LLM_TIMEOUT.
+    """
+    try:
+        return float(os.environ.get("VOICECARE_LLM_TIMEOUT", "") or 45.0)
+    except ValueError:
+        return 45.0
+
+
+def _dialogue_call(prompt: str, timeout: float | None = None) -> str:
+    """Human phrasing via Gemini (temp 0.7). Returns '' on any failure."""
+    timeout = _llm_timeout() if timeout is None else timeout
     """Human phrasing via Gemini (temp 0.7). Returns '' on any failure."""
     try:
         if not _has_any_llm_key():
@@ -127,7 +144,7 @@ def _correction_prefix(history=None) -> str:
     return ""
 
 
-def _gemini_call(system: str, user: str, timeout: float = 20.0, temperature: float = 0.0,
+def _gemini_call(system: str, user: str, timeout: float | None = None, temperature: float = 0.0,
                  max_tokens: int = 512) -> str:
     global _GEMINI_DEAD, _GEMINI_COOLDOWN_UNTIL
     if _GEMINI_DEAD:
@@ -573,7 +590,7 @@ except Exception:
     _nemotron_call = None
 
 
-def _llm_call(system: str, user: str, timeout: float = 20.0,
+def _llm_call(system: str, user: str, timeout: float | None = None,
               temperature: float = 0.0, max_tokens: int = 512) -> str:
     """Nemotron first (hackathon requirement), Gemini fallback."""
     global _LAST_LLM_BACKEND
