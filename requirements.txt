@@ -1,5 +1,5 @@
 # Primary demo: Streamlit Cloud runs app_streamlit.py with THIS file.
 # Keep it slim (3 pins) so Streamlit Cloud installs cleanly on modern Python.
-streamlit==1.64.0
+streamlit==1.65.0
 websocket-client==1.9.0
 edge-tts==7.3.1
