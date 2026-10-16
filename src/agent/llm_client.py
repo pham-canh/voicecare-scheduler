@@ -329,6 +329,15 @@ def extract_appointment(transcript: str) -> dict:
         if _has_any_llm_key():
             raw = _llm_call(EXTRACT_SYSTEM, f"Extract: {transcript}")
             d = _parse_json(raw)
+            # A reply truncated mid-token parses to nothing, and an unparsed
+            # reply is indistinguishable from a failed one. Try again before
+            # falling back to the regex path.
+            for _ in range(2):
+                if d:
+                    break
+                time.sleep(0.8)
+                raw = _llm_call(EXTRACT_SYSTEM, f"Extract: {transcript}")
+                d = _parse_json(raw)
             if d:
                 ms = round((time.perf_counter() - t0) * 1000, 1)
                 ent = {

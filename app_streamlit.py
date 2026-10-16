@@ -17,6 +17,7 @@ except Exception:
     st = None
 
 from main import run_pipeline, structured_to_fields
+from agent import llm_client
 try:
     from agent.config import key_status as _key_status
 except Exception:

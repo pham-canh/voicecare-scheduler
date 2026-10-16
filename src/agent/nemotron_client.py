@@ -47,9 +47,18 @@ def nemotron_call(system: str, user: str, timeout: float = 20.0,
         headers={"Content-Type": "application/json",
                  "Authorization": "Bearer " + key},
     )
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
-        out = json.loads(resp.read().decode("utf-8"))
-    try:
-        return (out["choices"][0]["message"]["content"] or "").strip()
-    except Exception:
-        return ""
+    last = "{}"
+    for _attempt in range(3):
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            out = json.loads(resp.read().decode("utf-8"))
+        last = json.dumps(out)[:200]
+        try:
+            text = (out["choices"][0]["message"]["content"] or "").strip()
+        except Exception:
+            text = ""
+        if text:
+            return text
+        # Nebius sometimes answers with an empty body. Retry rather than hand
+        # an empty string to the caller, which reads as "fallback" downstream.
+        time.sleep(0.8)
+    raise RuntimeError("nemotron returned an empty body 3x: " + last)
