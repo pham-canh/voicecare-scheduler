@@ -432,7 +432,14 @@ def main():
         ".stCaption,.stMarkdown small{color:#cbd5e1 !important;font-size:1.02rem}"
         "[data-testid='stSidebar']{background:#0d1526}"
         "[data-testid='stSidebar'] p,[data-testid='stSidebar'] span,[data-testid='stSidebar'] label{color:#e2e8f0 !important}"
-        ".stButton>button{font-size:1.2rem;padding:.65rem 1.2rem;border-radius:12px;font-weight:700}"
+        # The container above forces color:#f8fafc, which the buttons inherit,
+        # but they keep Streamlit's light-theme white background -- so the
+        # label renders white on white and the button looks empty. The demo
+        # button is the one thing a judge must be able to find. Set both.
+        ".stButton>button{font-size:1.2rem;padding:.65rem 1.2rem;border-radius:12px;font-weight:700;"
+        "background:#1e293b;color:#f8fafc !important;border:1px solid #334155}"
+        ".stButton>button:hover,.stButton>button:focus,"
+        ".stButton>button:active{background:#334155;color:#f8fafc !important;border-color:#475569}"
         ".stTextInput input{font-size:1.15rem}"
         "details{border:1px solid #334155;border-radius:12px;padding:.4rem .8rem;background:#0f1a2e}"
         "details summary{color:#f8fafc !important;font-size:1.1rem}"
