@@ -494,7 +494,14 @@ def main():
     # failed take used to look like nothing had happened.
     _notice = st.session_state.pop("_demo_notice", None)
     if _notice:
-        st.success(_notice[1]) if _notice[0] == "success" else st.warning(_notice[1])
+        # An if/else statement, not a conditional expression: a bare
+        # `st.success(...) if ... else st.warning(...)` leaks the returned
+        # DeltaGenerator into the page and Streamlit renders its whole API
+        # docstring as a white card right under the banner.
+        if _notice[0] == "success":
+            st.success(_notice[1])
+        else:
+            st.warning(_notice[1])
 
     st.markdown("### 🎬 One-click take")
     st.caption("Recording? Fresh take, then play the replay — the AI voices the whole visit. Judge self-driving? RUN FULL DEMO or Manual input.")
