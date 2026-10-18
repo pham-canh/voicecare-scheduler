@@ -1,0 +1,29 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      # The Streamlit app itself lives in repo/; the repo root holds recording
+      # scripts and exported artefacts. Running pytest from the root would
+      # collect nothing, so every step is scoped to repo/.
+      run:
+        working-directory: repo
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      # requirements-dev.txt is pytest only. The suite in src/test_smoke.py
+      # deliberately exercises pure functions and never imports streamlit, so
+      # the test gate stays under a second and stays runnable offline.
+      - run: pip install -r requirements-dev.txt
+      - name: app dependency install
+        run: pip install -r requirements.txt
+      - name: smoke test
+        run: PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest src/ -q
