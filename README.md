@@ -4,7 +4,7 @@
 
 Event: Devpost — Nebius x NVIDIA Global AI Hackathon | Stack: voice + NVIDIA Nemotron NLU | Demo: https://voicecare-scheduler-ajthuna54dqqhpqtt52n2b.streamlit.app/
 
-**Status:** in progress. This is a separate competition from
+**Status:** submitted to Devpost. This is a separate competition from
 [`assemblyai-voice-agent`](https://github.com/pham-canh/assemblyai-voice-agent),
 which is the completed AssemblyAI Voice Agent Hackathon (lablab.ai) entry.
 
@@ -30,6 +30,7 @@ python3 -c "import sys; sys.path.insert(0, 'src'); from agent.nemotron_client im
 ## Demo
 
 - Live: https://voicecare-scheduler-ajthuna54dqqhpqtt52n2b.streamlit.app/ (Streamlit Cloud, judges open and use it, no setup — if asleep, press Wake)
+- Video: https://youtu.be/z8tE1k7CDfM — "VoiceCare on Nemotron — Speak to Book a Clinic Visit", dubbed walkthrough.
 
 ## Run (5 minutes, no questions asked)
 
