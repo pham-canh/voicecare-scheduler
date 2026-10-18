@@ -34,10 +34,40 @@ python3 -c "import sys; sys.path.insert(0, 'src'); from agent.nemotron_client im
 
 ## Run (5 minutes, no questions asked)
 
+**Step 1 — get a key.** The NLU is NVIDIA Nemotron served from Nebius Token Factory.
+Without a key the agent cannot call it, so it falls back to a regex matcher and
+prints `nlu: source=regex-fallback`. That fallback is not the project — it is
+what you see when no key is set.
+
+```bash
+# free $25 with code NEBIUS-DEVPOST-GLOBAL26
+export NEBIUS_API_KEY='...'
+```
+
+**Step 2 — run.** `src/main.py` imports only the standard library, so there is
+nothing to install for this command.
+
 ```bash
 echo "[]" > src/bookings.json   # reset demo slots first (each typed run writes one slot)
-python3 src/main.py "your test input"
+python3 src/main.py "I want a cardiology appointment next Tuesday"
+```
+
+Look for `nlu: source=nemotron` in the output. That line is the proof that
+NVIDIA Nemotron is doing the understanding, rather than the fallback matcher.
+
+**Step 3 — tests.** The suite exercises pure functions only, so it needs pytest
+and nothing else.
+
+```bash
+pip install -r requirements-dev.txt
 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest src/ -q
+```
+
+**Step 4 — the web UI** (optional, this is what Streamlit Cloud runs).
+
+```bash
+pip install -r requirements.txt
+streamlit run app_streamlit.py
 ```
 
 ## How it works (5 business states)
