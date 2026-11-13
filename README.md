@@ -1,8 +1,11 @@
-# VoiceCare Scheduler — Nebius x NVIDIA Global AI Hackathon (Devpost entry)
+# VoiceCare Scheduler
 
-![demo](https://img.shields.io/badge/demo-live-brightgreen) ![license](https://img.shields.io/badge/license-MIT-green)
+**Voice booking for elderly clinic patients.** The patient speaks, the agent reads
+the appointment back, and nothing is booked until a spoken **yes**.
 
-Event: Devpost — Nebius x NVIDIA Global AI Hackathon | Stack: voice + NVIDIA Nemotron NLU | Demo: https://voicecare-scheduler-ajthuna54dqqhpqtt52n2b.streamlit.app/
+[![CI](https://github.com/pham-canh/voicecare-scheduler/actions/workflows/ci.yml/badge.svg)](https://github.com/pham-canh/voicecare-scheduler/actions/workflows/ci.yml)
+[![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![python](https://img.shields.io/badge/python-3.11%2B-blue)](requirements-dev.txt)
 
 <p align="center">
   <img src="docs/demo-loop.gif" width="820" alt="VoiceCare Scheduler demo: patient speaks, agent confirms, appointment booked">
@@ -10,13 +13,18 @@ Event: Devpost — Nebius x NVIDIA Global AI Hackathon | Stack: voice + NVIDIA N
   <a href="docs/demo.mp4">▶ Play the 24-second capture (silent, no narration)</a>
 </p>
 
+> **Status:** submitted to Devpost. The hosted Streamlit deploy currently
+> redirects to a Streamlit login, so use the in-repo capture above or run it
+> locally (below). The 42-second narrated cut is
+> <https://youtu.be/z8tE1k7CDfM>.
+
 ## Demo
 
-- Live: https://voicecare-scheduler-ajthuna54dqqhpqtt52n2b.streamlit.app/ (Streamlit Cloud, judges open and use it, no setup — if asleep, press Wake)
 - In this repo: [`docs/demo.mp4`](docs/demo.mp4) (24 s, silent screen capture), [`docs/demo-poster.png`](docs/demo-poster.png), loop above. Captured from the live app at 1440×1700 so the whole transcript and the booking card stay in frame.
-- Devpost submission cut, with narration: https://youtu.be/z8tE1k7CDfM
+- Narrated Devpost cut: <https://youtu.be/z8tE1k7CDfM>
+- Hosted deploy: <https://voicecare-scheduler-ajthuna54dqqhpqtt52n2b.streamlit.app/> (may require a Streamlit login)
 
-**Status:** submitted to Devpost. This is a separate competition from
+This is a separate competition from
 [`assemblyai-voice-agent`](https://github.com/pham-canh/assemblyai-voice-agent),
 which is the completed AssemblyAI Voice Agent Hackathon (lablab.ai) entry.
 
@@ -77,6 +85,16 @@ pip install -r requirements.txt
 streamlit run app_streamlit.py
 ```
 
+## Verify the claims
+
+| Claim | Command |
+|---|---|
+| 28 smoke tests pass | `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest src/ -q` |
+| Nothing books without a spoken yes | same, `-k "consent or barge_cancel"` |
+| The booking loop works end to end | same, `-k voice_loop_books` |
+| The UI reports the provider that answered | same, `-k "reports_real_provider or reports_gemini"` |
+| Nemotron is gated, not assumed | same, `-k nemotron_gate` |
+
 ## How it works (5 business states)
 
 ```
@@ -127,7 +145,7 @@ mic/file --token+WS--> AssemblyAI Voice Agent API (inline en session)
 
 - `src/main.py` — STT/batch fallback pipeline + tools (check/book, YES-gated strict)
 - `src/agent_api.py` — managed Voice Agent API (one-time token + direct voice WS + TTS)
-- `src/realtime.py` — streaming WS STT fallback (Universal-3-5-pro vi + diarization)
+- `src/realtime.py` — streaming WS STT fallback (Universal-3-5-pro en + diarization)
 - `src/test_smoke.py` — smoke tests
 - `app_streamlit.py` — main demo (single Streamlit URL for judges, 🎙 Voice Agent API demo button + labeled-backend fallback)
 - `app.py` — secondary HF Spaces demo (Gradio), same `run_pipeline` wrapper (see file docstring)
@@ -149,3 +167,13 @@ Built originally for this entry: EN specialty/doctor catalog + day/hour parsing,
 - Vietnam: ~12M over-60 (UNFPA 2023), ~5,000 private clinics (Ministry of Health est.).
 - Starting SAM (team estimate): 500 clinics x $39/mo = $19,500 MRR = $234k ARR year 1.
 - Revenue: SaaS $39/mo Solo / $99/mo Plus, cheaper than a ~$250/mo receptionist.
+
+## Entry
+
+Built for the **Nebius × NVIDIA Global AI Hackathon** on Devpost (October 2026).
+The event requirement is load-bearing: NLU runs on
+`nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B` via Nebius Token Factory, and the
+`nemotron_gate` test fails if the required provider is silently skipped.
+Speech-to-text is AssemblyAI. A separate lablab.ai entry,
+[`assemblyai-voice-agent`](https://github.com/pham-canh/assemblyai-voice-agent),
+shares the clinic-booking domain but not this code.
